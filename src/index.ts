@@ -90,7 +90,10 @@ program
 
       const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\\n').filter(repoUrl => repoUrl && !repoUrl.startsWith('#'));
 
-      repositories.forEach(async (repoUrl) => {
+      const totalRepositories = repositories.length;
+      let processedRepositories = 0;
+
+      for (const repoUrl of repositories) {
         const repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1).replace('.git', '');
         const repo_Path = path.join(repoPath, repoName);
 
@@ -109,8 +112,13 @@ program
             console.error(`Error updating ${repoUrl}: ${error}`);
           }
         }
+
+        processedRepositories++;
+        const progress = ((processedRepositories / totalRepositories) * 100).toFixed(2);
+        console.log(`Progress: ${progress}% (${processedRepositories}/${totalRepositories})`);
+
         await new Promise(resolve => setTimeout(resolve, 5000));
-      });
+      }
     }
 
     if (_cmd === "list") {
