@@ -18,7 +18,7 @@ program
   .version('0.0.1')
   .description('Backup or update GitHub repositories.')
   .argument("<cmd>", "command [backup|list]")
-  .option('-p, --repo-path <path>', 'The path to the directory containing source.txt')
+  .option('-p, --repo-path <path>', 'The path to the directory containing source.txt', ".")
   .option('-u, --username <username>', 'GitHub username')
   .option('-o, --output-path <path>', 'Output path for repository lists', 'github-repos')
   .action(async (_cmd, options) => {
@@ -88,7 +88,7 @@ program
         process.exit(1);
       }
 
-      const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\r\n').map(x=>x.trim()).filter(repoUrl => repoUrl && !repoUrl.startsWith('#') && repoUrl.endsWith(".git"));
+      const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\r\n').map(x => x.trim()).filter(repoUrl => repoUrl && !repoUrl.startsWith('#') && repoUrl.endsWith(".git"));
 
       const totalRepositories = repositories.length;
       let processedRepositories = 0;
@@ -113,6 +113,7 @@ program
           }
         } catch (error) {
           console.error(`Error ${action.toLowerCase()} ${repoUrl}: ${error}`);
+          process.exit(1);
         }
 
         processedRepositories++;
