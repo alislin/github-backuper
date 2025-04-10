@@ -17,10 +17,10 @@ const program = new Command();
 program
   .version('0.0.1')
   .description('Backup or update GitHub repositories.')
-  .argument("<cmd>", "command [backup|list]")
-  .option('-p, --repo-path <path>', 'The path to the directory containing source.txt', ".")
+  .argument("[cmd]", "command [backup|list]", "backup")
+  .option('-p, --repo-path [path]', 'The path to the directory containing source.txt', ".")
   .option('-u, --username <username>', 'GitHub username')
-  .option('-o, --output-path <path>', 'Output path for repository lists', 'github-repos')
+  .option('-o, --output-path [path]', 'Output path for repository lists', 'github-repos')
   .action(async (_cmd, options) => {
     const { username, outputPath, repoPath } = options;
 
