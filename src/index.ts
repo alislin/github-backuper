@@ -17,21 +17,21 @@ const program = new Command();
 program
   .version('0.0.1')
   .description('Backup or update GitHub repositories.')
-  .argument('<path>', 'The path to the directory containing source.txt')
+  .argument("<cmd>", "command [backup|list]")
+  .option('-p, --repo-path <path>', 'The path to the directory containing source.txt')
   .option('-u, --username <username>', 'GitHub username')
   .option('-o, --output-path <path>', 'Output path for repository lists', 'github-repos')
-  .option('--list', 'List GitHub repositories')
-  .action(async (_path, options) => {
-    const { username, outputPath, list } = options;
+  .action(async (_cmd, options) => {
+    const { username, outputPath, repoPath } = options;
 
     const getGithubRepoList = async (username: string, outputPath: string) => {
-      if (!username && list) {
+      if (!username) {
         console.error('Error: username is required when using --list');
         program.help();
         process.exit(1);
       }
 
-      const reposDir = path.join(_path, outputPath);
+      const reposDir = outputPath;
 
       if (!fs.existsSync(reposDir)) {
         fs.mkdirSync(reposDir, { recursive: true });
@@ -74,40 +74,49 @@ program
         process.exit(1);
       }
     };
-    if (list) {
-      await getGithubRepoList(username, outputPath);
-    } else {
-      const sourceFile = path.join(_path, 'source.txt');
+
+    async function backupRepos() {
+      const sourceFile = path.join(repoPath, 'source.txt');
 
       if (!fs.existsSync(sourceFile)) {
-        console.error(`Error: source.txt not found in ${_path}`);
+        console.error(`Error: source.txt not found in ${path}`);
         process.exit(1);
       }
 
       const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\\n').filter(repoUrl => repoUrl && !repoUrl.startsWith('#'));
 
-      repositories.forEach(async repoUrl => {
+      repositories.forEach(async (repoUrl) => {
         const repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1).replace('.git', '');
-        const repoPath = path.join(_path, repoName);
+        const repo_Path = path.join(repoPath, repoName);
 
-        if (!fs.existsSync(repoPath)) {
-          console.log(`Cloning ${repoUrl} to ${repoPath}`);
+        if (!fs.existsSync(repo_Path)) {
+          console.log(`Cloning ${repoUrl} to ${repo_Path}`);
           try {
-            execSync(`git clone --mirror ${repoUrl} ${repoPath}`, { stdio: 'inherit' });
+            execSync(`git clone --mirror ${repoUrl} ${repo_Path}`, { stdio: 'inherit' });
           } catch (error) {
             console.error(`Error cloning ${repoUrl}: ${error}`);
           }
         } else {
-          console.log(`Updating ${repoUrl} in ${repoPath}`);
+          console.log(`Updating ${repoUrl} in ${repo_Path}`);
           try {
-            execSync(`cd ${repoPath} && git remote update`, { stdio: 'inherit' });
+            execSync(`cd ${repo_Path} && git remote update`, { stdio: 'inherit' });
           } catch (error) {
             console.error(`Error updating ${repoUrl}: ${error}`);
           }
         }
-      await new Promise(resolve => setTimeout(resolve, 5000)); // 等待 5 秒
-    });
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      });
     }
+
+    if (_cmd === "list") {
+      await getGithubRepoList(username, outputPath);
+    } else if (_cmd === "backup") {
+      await backupRepos();
+    }
+    else {
+      program.help();
+    }
+
   });
 
 program.parse(process.argv);
