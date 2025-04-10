@@ -37,16 +37,26 @@ program
       }
 
       try {
-        const response = await fetch(`https://api.github.com/users/${username}/repos`);
-        const repos = await response.json();
+        let allRepos: any[] = [];
+        let nextPageUrl: string | null = `https://api.github.com/users/${username}/repos`;
 
-        if (!Array.isArray(repos)) {
-          console.error(`Error: Could not fetch repositories for ${username}`);
-          process.exit(1);
+        while (nextPageUrl) {
+          const response: Response = await fetch(nextPageUrl);
+          const repos = await response.json();
+
+          if (!Array.isArray(repos)) {
+            console.error(`Error: Could not fetch repositories for ${username}`);
+            process.exit(1);
+          }
+
+          allRepos = allRepos.concat(repos);
+
+          const linkHeader: string | null = response.headers.get('Link');
+          nextPageUrl = linkHeader?.split(',').find((link: string) => link.includes('rel="next"'))?.split(';')[0].replace(/<|>/g, '').trim() || null;
         }
 
-        const ownedRepos = repos.filter(repo => !repo.fork);
-        const forkedRepos = repos.filter(repo => repo.fork);
+        const ownedRepos = allRepos.filter(repo => !repo.fork);
+        const forkedRepos = allRepos.filter(repo => repo.fork);
 
         const writeRepoList = (repos: any[], filename: string) => {
           const filePath = path.join(reposDir, filename);
