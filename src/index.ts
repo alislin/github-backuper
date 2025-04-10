@@ -62,8 +62,10 @@ program
         const forkedRepos = allRepos.filter(repo => repo.fork);
 
         const writeRepoList = (repos: any[], filename: string) => {
+          if (!repos || repos.length === 0) return;
+
           const filePath = path.join(reposDir, filename);
-          const repoListContent = repos.map((repo: any) => `# ${repo.description || 'No description'}\n# ${repo.name}\n${repo.html_url}\n\n`).join('\n');
+          const repoListContent = repos.map((repo: any) => `# ${repo.description || 'No description'}\n# ${repo.name}\n# ${repo.html_url}\n${repo.clone_url}\n\n`).join('\n');
           fs.writeFileSync(filePath, repoListContent);
           console.log(`Wrote repository list to ${filePath}`);
         };
