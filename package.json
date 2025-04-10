@@ -18,7 +18,8 @@
   "author": "Alis",
   "license": "MIT",
   "dependencies": {
-    "commander": "^9.0.0"
+    "commander": "^9.0.0",
+    "node-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^16.0.0",
