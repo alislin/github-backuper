@@ -31,7 +31,7 @@ program
         process.exit(1);
       }
 
-      const reposDir = outputPath;
+      const reposDir = path.join(outputPath, username);
 
       if (!fs.existsSync(reposDir)) {
         fs.mkdirSync(reposDir, { recursive: true });
@@ -57,6 +57,8 @@ program
         }
 
         const ownedRepos = allRepos.filter(repo => !repo.fork);
+        const publicRepos = ownedRepos.filter(repo => !repo.private);
+        const privateRepos = ownedRepos.filter(repo => repo.private);
         const forkedRepos = allRepos.filter(repo => repo.fork);
 
         const writeRepoList = (repos: any[], filename: string) => {
@@ -66,8 +68,9 @@ program
           console.log(`Wrote repository list to ${filePath}`);
         };
 
-        writeRepoList(ownedRepos, `${username}.txt`);
-        writeRepoList(forkedRepos, `${username}.fork.txt`);
+        writeRepoList(publicRepos, `${username}.public.repo`);
+        writeRepoList(privateRepos, `${username}.private.repo`);
+        writeRepoList(forkedRepos, `${username}.fork.repo`);
 
       } catch (error) {
         console.error(`Error: ${error}`);
