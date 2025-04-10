@@ -2,13 +2,15 @@
   "name": "github-backuper",
   "version": "0.0.1",
   "description": "Backup or update GitHub repositories.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "bin": {
-    "github-backuper": "index.js"
+    "github-backuper": "dist/bundle.cjs"
   },
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node ./dist/index.js"
+    "start": "tsc && node ./dist/index.js",
+    "package": "npx pkg --target node16-win-x64 .",
+    "bundle": "esbuild dist/index.mjs --bundle --outfile=./dist/bundle.cjs --platform=node --format=cjs"
   },
   "keywords": [
     "github",
@@ -18,8 +20,11 @@
   "author": "Alis",
   "license": "MIT",
   "dependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "commander": "^9.0.0",
-    "node-fetch": "^3.0.0"
+    "esbuild": "^0.25.2",
+    "node-fetch": "^3.0.0",
+    "rollup": "^4.39.0"
   },
   "devDependencies": {
     "@types/node": "^16.0.0",
