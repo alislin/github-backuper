@@ -7,10 +7,10 @@
     "github-backuper": "dist/bundle.cjs"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && copy dist\\index.js dist\\index.mjs",
     "start": "tsc && node ./dist/index.js",
     "package": "npx pkg --target node16-win-x64 .",
-    "bundle": "esbuild dist/index.mjs --bundle --outfile=./dist/bundle.cjs --platform=node --format=cjs"
+    "bundle": "npm run build && esbuild dist/index.mjs --bundle --outfile=./dist/bundle.cjs --platform=node --format=cjs"
   },
   "keywords": [
     "github",
