@@ -15,7 +15,7 @@
     "backup",
     "update"
   ],
-  "author": "Roo",
+  "author": "Alis",
   "license": "MIT",
   "dependencies": {
     "commander": "^9.0.0"

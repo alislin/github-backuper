@@ -5,7 +5,7 @@
  * @Date: 2025-04-10 09:16:06
  * @LastEditors: Lin Ya
  * @LastEditTime: 2025-04-10 09:17:23
- * @Description: file content
+ * @Description: 备份命令
  */
 import { Command } from 'commander';
 import * as fs from 'fs';
