@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node index.js"
+    "start": "tsc && node ./dist/index.js"
   },
   "keywords": [
     "github",

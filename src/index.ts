@@ -25,8 +25,9 @@ program
     const { username, outputPath, list } = options;
 
     const getGithubRepoList = async (username: string, outputPath: string) => {
-      if (!username) {
+      if (!username && list) {
         console.error('Error: username is required when using --list');
+        program.help();
         process.exit(1);
       }
 
@@ -83,9 +84,9 @@ program
         process.exit(1);
       }
 
-      const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\\n');
+      const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\\n').filter(repoUrl => repoUrl && !repoUrl.startsWith('#'));
 
-      repositories.forEach(repoUrl => {
+      repositories.forEach(async repoUrl => {
         const repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1).replace('.git', '');
         const repoPath = path.join(_path, repoName);
 
@@ -104,8 +105,13 @@ program
             console.error(`Error updating ${repoUrl}: ${error}`);
           }
         }
-      });
+      await new Promise(resolve => setTimeout(resolve, 5000)); // 等待 5 秒
+    });
     }
   });
 
 program.parse(process.argv);
+
+if (process.argv.slice(2).length === 0) {
+  program.help();
+}
