@@ -84,7 +84,8 @@ program
       const sourceFile = path.join(repoPath, 'source.txt');
 
       if (!fs.existsSync(sourceFile)) {
-        console.error(`Error: source.txt not found in ${path}`);
+        console.error(`Error: source.txt not found in ${repoPath}`);
+        program.help();
         process.exit(1);
       }
 
@@ -142,5 +143,5 @@ program
 program.parse(process.argv);
 
 if (process.argv.slice(2).length === 0) {
-  program.help();
+  // program.help();
 }
