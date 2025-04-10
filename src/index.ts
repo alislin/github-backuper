@@ -88,37 +88,43 @@ program
         process.exit(1);
       }
 
-      const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\\n').filter(repoUrl => repoUrl && !repoUrl.startsWith('#'));
+      const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\r\n').map(x=>x.trim()).filter(repoUrl => repoUrl && !repoUrl.startsWith('#') && repoUrl.endsWith(".git"));
 
       const totalRepositories = repositories.length;
       let processedRepositories = 0;
+      const progressBarLength = 30;
 
       for (const repoUrl of repositories) {
         const repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1).replace('.git', '');
         const repo_Path = path.join(repoPath, repoName);
 
-        if (!fs.existsSync(repo_Path)) {
-          console.log(`Cloning ${repoUrl} to ${repo_Path}`);
-          try {
+        let action = "Cloning";
+        if (fs.existsSync(repo_Path)) {
+          action = "Updating";
+        }
+
+        try {
+          if (!fs.existsSync(repo_Path)) {
+            console.log(`${action} ${repoUrl} to ${repo_Path}`);
             execSync(`git clone --mirror ${repoUrl} ${repo_Path}`, { stdio: 'inherit' });
-          } catch (error) {
-            console.error(`Error cloning ${repoUrl}: ${error}`);
-          }
-        } else {
-          console.log(`Updating ${repoUrl} in ${repo_Path}`);
-          try {
+          } else {
+            console.log(`${action} ${repoUrl} in ${repo_Path}`);
             execSync(`cd ${repo_Path} && git remote update`, { stdio: 'inherit' });
-          } catch (error) {
-            console.error(`Error updating ${repoUrl}: ${error}`);
           }
+        } catch (error) {
+          console.error(`Error ${action.toLowerCase()} ${repoUrl}: ${error}`);
         }
 
         processedRepositories++;
-        const progress = ((processedRepositories / totalRepositories) * 100).toFixed(2);
-        console.log(`Progress: ${progress}% (${processedRepositories}/${totalRepositories})`);
+        const progress = processedRepositories / totalRepositories;
+        const completed = Math.floor(progress * progressBarLength);
+        const bar = '='.repeat(completed) + '-'.repeat(progressBarLength - completed);
+
+        process.stdout.write(`\r[${bar}] ${action} ${repoName} (${processedRepositories}/${totalRepositories})`);
 
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
+      process.stdout.write('\n');
     }
 
     if (_cmd === "list") {
