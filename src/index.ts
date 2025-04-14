@@ -127,6 +127,13 @@ program
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
       process.stdout.write('\n');
+
+      // Write update log
+      const logFilePath = path.join(repoPath, 'update-log.txt');
+      const timestamp = new Date().toLocaleString();
+      const logContent = `Backup completed at ${timestamp}, ${processedRepositories} repositories processed.\n`;
+      fs.writeFileSync(logFilePath, logContent, { flag: 'a' });
+      console.log(`Update log written to ${logFilePath}`);
     }
 
     if (_cmd === "list") {
