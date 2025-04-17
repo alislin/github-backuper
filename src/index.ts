@@ -89,6 +89,8 @@ program
         process.exit(1);
       }
 
+      const all_start=Date.now();
+
       const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\r\n').map(x => x.trim()).filter(repoUrl => repoUrl && !repoUrl.startsWith('#') && repoUrl.endsWith(".git"));
 
       const totalRepositories = repositories.length;
@@ -97,42 +99,56 @@ program
 
       for (const repoUrl of repositories) {
         const repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1).replace('.git', '');
-        const repo_Path = path.join(repoPath, repoName);
+        const repo_Path = path.join(repoPath, repoPath, repoName);
 
         let action = "Cloning";
         if (fs.existsSync(repo_Path)) {
           action = "Updating";
         }
-
+        const startTime = Date.now();
         try {
           if (!fs.existsSync(repo_Path)) {
-            console.log(`${action} ${repoUrl} to ${repo_Path}`);
+            console.log(`\n${action} [${repoUrl}] to [${repo_Path}]`);
             execSync(`git clone --mirror ${repoUrl} ${repo_Path}`, { stdio: 'inherit' });
           } else {
-            console.log(`${action} ${repoUrl} in ${repo_Path}`);
+            console.log(`\n${action} [${repoUrl}] in [${repo_Path}]`);
             execSync(`cd ${repo_Path} && git remote update`, { stdio: 'inherit' });
           }
         } catch (error) {
           console.error(`Error ${action.toLowerCase()} ${repoUrl}: ${error}`);
           process.exit(1);
         }
+        const endTime = Date.now();
+        const duration = (endTime - startTime) / 1000;
 
         processedRepositories++;
         const progress = processedRepositories / totalRepositories;
         const completed = Math.floor(progress * progressBarLength);
         const bar = '='.repeat(completed) + '-'.repeat(progressBarLength - completed);
 
-        process.stdout.write(`\r[${bar}] ${action} ${repoName} (${processedRepositories}/${totalRepositories})`);
+        process.stdout.write(`\r[${bar}] ${action} ${repoName} (${processedRepositories}/${totalRepositories}) - ${duration.toFixed(2)}s\n`);
 
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
       process.stdout.write('\n');
 
+      const all_end=Date.now();
+      const all_duration = (all_end - all_start) / 1000;
       // Write update log
       const logFilePath = path.join(repoPath, 'update-log.txt');
       const timestamp = new Date().toLocaleString();
-      const logContent = `Backup completed at ${timestamp}, ${processedRepositories} repositories processed.\n`;
-      fs.writeFileSync(logFilePath, logContent, { flag: 'a' });
+      const logContent = `Backup completed at ${timestamp}, ${processedRepositories} repositories processed. lasts ${all_duration} seconds\n`;
+      // const detailLogContent = repositories.map(repoUrl => {
+      //   const repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1).replace('.git', '');
+      //   const repo_Path = path.join(repoPath, repoPath, repoName);
+      //   let action = fs.existsSync(repo_Path) ? "Updated" : "Cloned";
+      //   const startTime = Date.now(); // 重新计算开始时间以获取准确的持续时间
+      //   const endTime = Date.now();   // 重新计算结束时间
+      //   const duration = (endTime - startTime) / 1000;
+      //   return `${action} ${repoUrl} - ${duration.toFixed(2)}s`;
+      // }).join('\n');
+
+      fs.writeFileSync(logFilePath, logContent + '\n', { flag: 'a' });
       console.log(`Update log written to ${logFilePath}`);
     }
 
