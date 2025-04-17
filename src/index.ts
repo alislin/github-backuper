@@ -89,7 +89,7 @@ program
         process.exit(1);
       }
 
-      const all_start=Date.now();
+      const all_start = Date.now();
 
       const repositories = fs.readFileSync(sourceFile, 'utf-8').trim().split('\r\n').map(x => x.trim()).filter(repoUrl => repoUrl && !repoUrl.startsWith('#') && repoUrl.endsWith(".git"));
 
@@ -99,7 +99,7 @@ program
 
       for (const repoUrl of repositories) {
         const repoName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1).replace('.git', '');
-        const repo_Path = path.join(repoPath, repoPath, repoName);
+        const repo_Path = path.isAbsolute(repoName) ? repoName : path.join(repoPath, repoName);
 
         let action = "Cloning";
         if (fs.existsSync(repo_Path)) {
@@ -132,7 +132,7 @@ program
       }
       process.stdout.write('\n');
 
-      const all_end=Date.now();
+      const all_end = Date.now();
       const all_duration = (all_end - all_start) / 1000;
       // Write update log
       const logFilePath = path.join(repoPath, 'update-log.txt');
